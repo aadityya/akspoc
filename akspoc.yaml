@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: akspocreg1.azurecr.io/akspoc:latest
+          image: akspoccreg.azurecr.io/akspoc:latest
           ports:
             - containerPort: 8080
           imagePullPolicy: Always
