@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akspoc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akspoc
+  template:
+    metadata:
+      labels:
+        app: akspoc
+    spec:
+      containers:
+        - name: app
+          image: akspocreg1.azurecr.io/akspoc:latest
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
