@@ -20,7 +20,7 @@ public class SecretManagement {
     }
 
     private SecretWrapper populateSecret(String key) {
-        log.info("Retrieving value for key {}", key);
+        log.info("Retrieving value for key : {}", key);
         Secret secret = new Secret();
         secret.setKey("connectionstr");
         secret.setValue("jdbc://somedb");
