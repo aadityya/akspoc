@@ -22,8 +22,8 @@ public class SecretManagement {
     private SecretWrapper populateSecret(String key) {
         log.info("Retrieving value for key : {}", key);
         Secret secret = new Secret();
-        secret.setKey("connectionstr");
-        secret.setValue("jdbc://somedb");
+        secret.setKey("Version 2 - connectionstr");
+        secret.setValue("Version 2 - jdbc://somedb");
         SecretWrapper wrapper = new SecretWrapper();
         wrapper.setSecret(secret);
         return wrapper;
