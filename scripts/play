@@ -1,0 +1,20 @@
+#Alpha App with ingress defined with alpa route only
+helm upgrade --install --dry-run --debug --namespace alpha-beta-ns --create-namespace alpha-deployment .
+helm upgrade --install --namespace alpha-beta-ns --create-namespace alpha-deployment .
+
+#Beta App with no ingress defined
+helm upgrade --install --dry-run --debug --namespace alpha-beta-ns --create-namespace beta-deployment .
+helm upgrade --install --namespace alpha-beta-ns --create-namespace beta-deployment .
+
+#Alpha App with ingress defined with alpa & beta routes
+helm upgrade --install --dry-run --debug --namespace alpha-beta-ns --create-namespace alpha-deployment .
+helm upgrade --install --namespace alpha-beta-ns --create-namespace alpha-deployment .
+
+
+##Uninstall###
+helm uninstall alpha-deployment -n alpha-beta-ns
+helm uninstall beta-deployment -n alpha-beta-ns
+
+
+
+

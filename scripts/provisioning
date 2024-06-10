@@ -1,0 +1,46 @@
+# Code setup
+docker images
+
+docker image rm -f akspoccreg1.azurecr.io/akspoc
+
+docker buildx build --platform linux/amd64 -t akspoccreg.azurecr.io/akspoc .
+
+docker buildx build --platform linux/amd64 -t akspoccreg.azurecr.io/akspoc .
+
+docker run -it -p 8080:8080 akspoccreg.azurecr.io/akspoc
+
+curl http://localhost:8080/secrets/key
+
+az acr login -n akspoccreg
+
+docker push akspoccreg.azurecr.io/akspoc
+
+# Provisioning
+az account set --subscription e3ea7e66-6e67-4a87-a4cb-b7f29b65d1f0
+
+az group create --name k8s-deployment-strategy-ab --location eastus
+
+az aks create -n aks-poc-cluster -g k8s-deployment-strategy-ab --network-plugin azure --enable-managed-identity -a ingress-appgw --appgw-name ask-poc-agic --appgw-subnet-cidr "10.225.0.0/16" --generate-ssh-keys
+
+# Get application gateway id from AKS addon profile
+appGatewayId=$(az aks show -n aks-poc-cluster -g k8s-deployment-strategy-ab -o tsv --query "addonProfiles.ingressApplicationGateway.config.effectiveApplicationGatewayId")
+
+# Get Application Gateway subnet id
+appGatewaySubnetId=$(az network application-gateway show --ids $appGatewayId -o tsv --query "gatewayIPConfigurations[0].subnet.id")
+
+# Get AGIC addon identity
+agicAddonIdentity=$(az aks show -n aks-poc-cluster -g k8s-deployment-strategy-ab -o tsv --query "addonProfiles.ingressApplicationGateway.identity.clientId")
+
+# Assign network contributor role to AGIC addon identity to subnet that contains the Application Gateway
+az role assignment create --assignee $agicAddonIdentity --scope $appGatewaySubnetId --role "Network Contributor"
+
+#Id
+az aks show --resource-group k8s-deployment-strategy-ab --name aks-poc-cluster --query identityProfile.kubeletidentity.clientId -o tsv
+
+#Ensure a repo exists with name akspocacr with two versions alpha, beta of the same application
+az acr show --name akspocacr.azurecr.io --query id -o tsv
+
+#Use Id here from previous + 1 step
+az role assignment create --assignee 8d46175e-f8f8-4765-9ddb-5b9a598d5097 --role AcrPull --scope /subscriptions/e3ea7e66-6e67-4a87-a4cb-b7f29b65d1f0/resourceGroups/k8s-dep-dtrategy/providers/Microsoft.ContainerRegistry/registries/akspocacr
+
+az role assignment list --scope scope --scope /subscriptions/e3ea7e66-6e67-4a87-a4cb-b7f29b65d1f0/resourceGroups/k8s-dep-dtrategy/providers/Microsoft.ContainerRegistry/registries/akspocacr --query "[].{PrincipalName:principalName, Role:roleDefinitionName, PrincipalType:principalType}" -o table

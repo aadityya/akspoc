@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.versions.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.versions.name }}
+    spec:
+      containers:
+        - name: {{ .Values.container.name }}
+          image: {{ .Values.container.imageFullyQualified }}
+          ports:
+            - containerPort: {{ .Values.service.incomingPort }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  labels:
+    app: aks-poc-service-{{ .Values.versions.name }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ .Values.versions.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.incomingPort }}
+      targetPort: {{ .Values.service.targetPort }}
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name | quote }}
+  annotations:
+    kubernetes.io/ingress.class: "azure/application-gateway"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.rulesPathAlpha }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.ingress.serviceNameAlpha }}
+                port:
+                  number: {{ .Values.service.incomingPort }}
+    - http:
+        paths:
+          - path: {{ .Values.ingress.rulesPathBeta }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.ingress.serviceNameBeta }}
+                port:
+                  number: {{ .Values.service.incomingPort }}
+

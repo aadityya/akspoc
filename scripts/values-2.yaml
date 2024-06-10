@@ -1,0 +1,26 @@
+# deployment
+deployment:
+  strategy:
+    type: "MultiVersion"
+replicaCount: 2
+container:
+  name: "aks-poc-container-beta"
+  imageFullyQualified: "akspocacr.azurecr.io/akspoc:beta"
+  imagePullPolicy: "IfNotPresent"
+
+# service
+service:
+  name: "aks-poc-service-beta"
+  type: "ClusterIP"
+  incomingPort: 80
+  targetPort: 8080
+
+#ingress
+ingress:
+  rulesPathAlpha: "/alpha"
+  rulesPathBeta: "/beta"
+  serviceNameAlpha: "aks-poc-service-alpha"
+  serviceNameBeta: "aks-poc-service-beta"
+  name: "akspoc-ingress"
+versions:
+  name: "beta"
